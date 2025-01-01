@@ -21,10 +21,12 @@ public:
     void Reset();
     void LoadControlPanel();
     void DrawControlPanel();
+    void ScreenShot();
 
 
 private:
     std::vector<Block> blocks;
+    
 
 
 };

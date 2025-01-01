@@ -1,5 +1,11 @@
 #include "custom.h"
 #include <iostream>
+#include "raylib.h"
+#include "rlgl.h"
+#include "stb_image_write.h" // Include a library for saving PNGs
+#include <string>
+#include <unistd.h>
+
 
 Custom::Custom(int width, int height)
 {
@@ -285,4 +291,67 @@ void Custom::DrawControlPanel()
         }
     }
     currentBlock.Draw(width * 30 + 150, height * 30 / 2 - controlPanel.height / 2 - 30);
+}
+
+void Custom::ScreenShot()
+{
+    // Calculate the cropped image dimensions
+    int cropWidth = width * 30 + 20;
+    int cropHeight = height * 30 + 20;
+
+    // Get full screen pixel data
+    int renderWidth = GetScreenWidth();
+    int renderHeight = GetScreenHeight();
+    unsigned char *imgData = rlReadScreenPixels(renderWidth, renderHeight);
+
+    // Validate that the crop dimensions do not exceed screen dimensions
+    if (cropWidth > renderWidth || cropHeight > renderHeight)
+    {
+        TraceLog(LOG_ERROR, "Crop dimensions exceed screen dimensions");
+        delete[] imgData;
+        return;
+    }
+
+    // Allocate memory for the cropped data
+    unsigned char *croppedData = new unsigned char[cropWidth * cropHeight * 4]; // 4 bytes per pixel (RGBA)
+
+    // Extract the cropped region starting at (0, 0)
+    for (int y = 0; y < cropHeight; y++)
+    {
+        for (int x = 0; x < cropWidth; x++)
+        {
+            int srcIndex = 4 * (y * renderWidth + x); // Full image index
+            int dstIndex = 4 * (y * cropWidth + x);   // Cropped image index
+
+            // Copy RGBA values
+            croppedData[dstIndex + 0] = imgData[srcIndex + 0]; // Red
+            croppedData[dstIndex + 1] = imgData[srcIndex + 1]; // Green
+            croppedData[dstIndex + 2] = imgData[srcIndex + 2]; // Blue
+            croppedData[dstIndex + 3] = imgData[srcIndex + 3]; // Alpha
+        }
+    }
+
+    // Save the cropped image to a file
+    FILE *file = fopen("number", "r");
+    int number;
+    if (file == NULL)
+    {
+        number = 0;
+    }
+    else
+    {
+        fscanf(file, "%d", &number);
+        fclose(file);
+    }
+    file = fopen("number", "w");
+    fprintf(file, "%d", number + 1);
+    fclose(file);
+
+    std::string fileName = "screenshot" + std::to_string(number) + ".png";
+
+    stbi_write_png(fileName.c_str(), cropWidth, cropHeight, 4, croppedData, cropWidth * 4);
+
+    // Cleanup
+    delete[] imgData;
+    delete[] croppedData;
 }

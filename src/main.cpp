@@ -66,7 +66,7 @@ int main()
                 if (CheckCollisionPointRec(mousePosition, {40, 10, 440, 60}))
                 {
                     currentMode = Custom;
-                    std::cout << "Custom Build Mode is not implemented yet" << std::endl;
+                    SetWindowSize(30 * width + 400, 30 * height + 20);
                 }
                 else if (CheckCollisionPointRec(mousePosition, {115, 310, 250, 60}))
                 {
@@ -116,8 +116,6 @@ int main()
         {
 
             // Custom mode
-            SetWindowSize(30 * width + 400, 30 * height + 20);
-
             BeginDrawing();
             ClearBackground(darkBlue);
             custom.DrawControlPanel();
@@ -131,6 +129,11 @@ int main()
             }
             custom.grid.Draw();
             EndDrawing();
+
+            if (IsKeyPressed(KEY_S))
+            {
+                custom.ScreenShot();
+            }
         }
     }
 
